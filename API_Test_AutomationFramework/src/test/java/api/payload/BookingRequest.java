@@ -53,7 +53,8 @@ public class BookingRequest {
 	        this.bookingdates = bookingdates;
 	    }
 
-	    public String getAdditionalneeds() {
+	    public String getAdditionalneeds() 
+	    {
 	        return additionalneeds;
 	    }
 

@@ -40,11 +40,12 @@ String body = "{\r\n"
 		}
 		public static Response readUser(String bookingid)
 		{
-			Response response=given()
-					.pathParam("bookingid", bookingid)
-				  
+			
+			
+			Routes.get_url.replace("{bookingid}", bookingid);
+			Response response=given()	  
 			.when()
-			.get(Routes.get_url);
+			.get(Routes.get_url.replace("{bookingid}", bookingid));
 			return response;
 		}
 				

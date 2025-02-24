@@ -2,8 +2,12 @@ package api.test;
 
 
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpResponse;
 import java.time.LocalDate;
 
+import org.apache.http.HttpRequest;
 import org.junit.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -11,6 +15,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import io.restassured.response.Response;
 import api.endpoints.UserEndPoints;
 import api.payload.BookingDates;
@@ -25,6 +32,7 @@ public class UserTests
 	
 	User userPayload=new User();
 	BookingDates dates=new BookingDates();
+	
 	//@BeforeClass
 	public void SetUpData() 
 	{
@@ -70,18 +78,21 @@ public class UserTests
             BookingRequest deserializedRequest = objectMapper.readValue(jsonRequest, BookingRequest.class);
             System.out.println("First Name: " + deserializedRequest.getFirstname());
             System.out.println("Check-in Date: " + deserializedRequest.getBookingdates().getCheckin());
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
     
 	}
 	
-	public void getdata()
+	public void getdata() throws JsonMappingException, JsonProcessingException
 	{
 		ObjectMapper objectMapper = new ObjectMapper();
+		 objectMapper.registerModule(new JavaTimeModule()); 
+		 
 		 try 
 		 {
-			BookingResponseGetRequest  response = objectMapper.readValue(jsonRequest,  BookingResponseGetRequest .class);
+			 BookingRequest  response = objectMapper.readValue(jsonRequest,  BookingRequest.class);
 		} catch (JsonMappingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -89,25 +100,29 @@ public class UserTests
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		 BookingRequest response = objectMapper.readValue(jsonRequest, BookingRequest.class);
+		 
+		 System.out.println("Additional Properties: " + response.getAdditionalneeds());
+		 
+		 
 	}
 	@Test(priority=1)
-	public void testPostUser()
+	public void testPostUser()throws JsonMappingException, JsonProcessingException
 	{
 		setUp();
 		Response response = UserEndPoints.createUser(jsonRequest);
 		response.then().log().all().statusCode(200);
-		
-		
-		
-		
+		Response getResponse = UserEndPoints.readUser(String.valueOf(response.jsonPath().getInt("bookingid")));
+		System.out.println(getResponse.asPrettyString());
 	}
 	@Test(priority=2)
-	public void testGetUser()
+	public void testGetUser() throws JsonMappingException, JsonProcessingException
 	{
 		getdata();
 		Response response = UserEndPoints.readUser(jsonRequest);
+		Response getResponse = UserEndPoints.readUser(String.valueOf(response.jsonPath().getInt("bookingid")));
 		response.then().log().all().statusCode(200);
-		
+		System.out.println(getResponse.asPrettyString());
 	}
 
 }
